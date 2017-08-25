@@ -1,0 +1,9 @@
+---
+
+zserver_version: 3.0.9
+zserver_release: 1
+zserver_dbname: zabbix
+zserver_dbuser: zabbix
+zserver_dbpassword: zabbix
+zserver_dbport: 3306
+zserver_timeout: 30

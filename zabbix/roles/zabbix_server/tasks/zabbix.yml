@@ -1,0 +1,42 @@
+---
+- name: mkdir zabbix_files
+  file: path=/tmp/zabbix state=directory
+
+- name: copy zabbix files
+  copy: src={{ item }} dest=/tmp/zabbix
+  with_fileglob:
+    - files/*.rpm
+    
+- command: ls /tmp/zabbix
+  register: file_list
+
+- name: install zabbix-server
+  yum: name=/tmp/zabbix/{{ item }} state=present
+  with_items: 
+    - "{{ file_list.stdout_lines }}"
+  
+- name: copy simsun fonts
+  copy: src=msyh.ttc dest=/usr/share/fonts
+
+- name: create fonts link for zabbix
+  file: src=/usr/share/fonts/msyh.ttc dest=/etc/alternatives/zabbix-web-font
+  
+
+- name: copy zabbix-server config
+  template: src=zabbix_server.conf.j2 dest=/etc/zabbix/zabbix_server.conf backup=yes
+  notify: restart zabbix-server
+
+- name: ensure zabbix-server is running
+  service: name=zabbix-server state=started enabled=yes
+
+# - name: ensure zabbix-java-gateway is running
+#   service: name=zabbix-java-gateway state=started enabled=yes
+
+- name: ensure httpd is running
+  service: name=httpd state=started enabled=yes
+  
+- name: modify php.ini timezone
+  lineinfile: dest=/etc/php.ini regexp="^;?date.timezone =" line="date.timezone = Asia/Shanghai" state=present
+  notify: reload httpd config
+
+

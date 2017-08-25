@@ -1,0 +1,7 @@
+---
+
+- name: reload httpd config
+  service: name=httpd state=reloaded
+
+- name: restart zabbix-server
+  service: name=zabbix-server state=restarted

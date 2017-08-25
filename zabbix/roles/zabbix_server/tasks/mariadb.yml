@@ -1,0 +1,22 @@
+- name: install mariadb-server
+  yum: name=mariadb-server state=latest
+ 
+- name: copy config file
+  template: src=my.cnf.j2 dest=/etc/my.cnf
+
+- name: enable mariadb-server
+  service: name=mariadb state=started enabled=yes
+
+- name: install mysql-python module
+  yum: name=MySQL-python state=present
+  
+- name: create database zabbix for mariadb
+  mysql_db: name={{ zserver_dbname }} state=present
+
+- name: initialize database zabbix for mariadb
+  mysql_db: name={{ zserver_dbname }}  state=import target=/usr/share/doc/zabbix-server-mysql-{{ zserver_version }}/create.sql.gz
+  ignore_errors: yes
+
+- name: setup zabbix user for mariadb
+  mysql_user: name={{ zserver_dbuser }} password={{ zserver_dbpassword }} state=present priv=zabbix.*:all
+
